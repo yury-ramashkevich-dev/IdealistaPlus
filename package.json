@@ -1,0 +1,26 @@
+{
+  "name": "idealista-plus",
+  "version": "1.0.0",
+  "description": "Property comparison tool for Idealista listings",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently \"pnpm run dev:backend\" \"pnpm run dev:frontend\"",
+    "dev:backend": "pnpm --filter backend dev",
+    "dev:frontend": "pnpm --filter frontend dev",
+    "build": "pnpm --filter frontend build",
+    "lint": "pnpm -r lint",
+    "format": "prettier --write \"packages/**/*.{js,jsx,json,css,md}\""
+  },
+  "keywords": [
+    "idealista",
+    "property",
+    "comparison",
+    "real-estate"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "prettier": "^3.1.1"
+  }
+}
