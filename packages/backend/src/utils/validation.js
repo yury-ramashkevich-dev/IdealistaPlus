@@ -1,4 +1,4 @@
-const IDEALISTA_URL_PATTERN = /^https?:\/\/(www\.)?idealista\.com\/inmueble\/\d+\/?$/;
+const IDEALISTA_URL_PATTERN = /^https?:\/\/(www\.)?idealista\.com\/([a-z]{2}\/)?inmueble\/\d+\/?$/;
 
 export function isValidIdealistaUrl(url) {
   if (!url || typeof url !== 'string') return false;

@@ -27,15 +27,19 @@ async function main() {
   const hasUnchecked = content.includes('- [ ]');
   const hasChecked = content.includes('- [x]');
 
-  // Look for a "Current Milestone" or in-progress milestone header
-  const currentMilestoneMatch = content.match(/## (?:Current Milestone|⏳[^#]*): (Milestone \d+ - [^\n]+)/);
+  // Look for an in-progress milestone header (various emoji/text formats)
+  const currentMilestoneMatch = content.match(/## (?:Current Milestone|⏳|🔄)[^\n]*?(Milestone \d+ - [^\n]+)/);
 
-  if (!currentMilestoneMatch) {
-    // No in-progress milestone found
+  // Also check for completed milestones (✅) - take the most recent (last match)
+  const completedMatches = [...content.matchAll(/## ✅ Completed: (Milestone \d+ - [^\n]+)/g)];
+  const latestCompleted = completedMatches.length > 0 ? completedMatches[completedMatches.length - 1] : null;
+
+  if (!currentMilestoneMatch && !latestCompleted) {
+    // No relevant milestone found
     process.exit(0);
   }
 
-  const milestoneName = currentMilestoneMatch[1];
+  const milestoneName = currentMilestoneMatch ? currentMilestoneMatch[1] : latestCompleted[1];
 
   if (hasChecked && !hasUnchecked) {
     // All tasks are checked - milestone appears complete

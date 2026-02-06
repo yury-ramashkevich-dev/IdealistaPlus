@@ -32,15 +32,31 @@ async function main() {
     const changedFiles = status.split('\n').length;
 
     // Check recent commit messages to detect milestone pattern
-    const lastCommit = execSync('git log --oneline -1 2>/dev/null || echo "none"', {
+    const lastCommit = execSync('git log --oneline -1 2>nul || echo none', {
       cwd: projectDir,
       encoding: 'utf-8'
     }).trim();
 
+    // Check if branch is ahead of remote (unpushed commits)
+    let unpushed = 0;
+    try {
+      const ahead = execSync('git rev-list --count @{u}..HEAD 2>nul || echo 0', {
+        cwd: projectDir,
+        encoding: 'utf-8'
+      }).trim();
+      unpushed = parseInt(ahead, 10) || 0;
+    } catch {
+      // No upstream set
+    }
+
+    const pushReminder = unpushed > 0
+      ? ` Also, there are ${unpushed} unpushed commit(s) — suggest pushing to remote after committing.`
+      : '';
+
     const output = {
       hookSpecificOutput: {
         hookEventName: 'Stop',
-        additionalContext: `GIT STATUS: ${changedFiles} uncommitted file(s) detected. Last commit: "${lastCommit}". If a milestone was just completed, suggest committing with a message like "Milestone N: <description>" and ask the user for confirmation before committing.`
+        additionalContext: `GIT STATUS: ${changedFiles} uncommitted file(s) detected. Last commit: "${lastCommit}". If a milestone was just completed, suggest committing with a message like "Milestone N: <description>" and pushing to remote. Ask the user for confirmation before committing and pushing.${pushReminder}`
       }
     };
     console.log(JSON.stringify(output));

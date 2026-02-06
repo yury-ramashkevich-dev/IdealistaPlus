@@ -30,7 +30,9 @@
       "Bash(where:*)",
       "Bash(cmdkey:*)",
       "Bash(netstat:*)",
-      "Bash(findstr:*)"
+      "Bash(findstr:*)",
+      "Bash(powershell -NoProfile -Command:*)",
+      "Bash(powershell -NoProfile -File - <<'PS1'\n$p = Get-NetTCPConnection -LocalPort 5174 -ErrorAction SilentlyContinue | Select-Object -ExpandProperty OwningProcess -First 1\nif \\($p\\) { Stop-Process -Id $p -Force }\nPS1)"
     ],
     "deny": [
       "Bash(rm:*)",

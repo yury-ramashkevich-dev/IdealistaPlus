@@ -116,12 +116,99 @@
 
 ---
 
+## ✅ Completed: Milestone 3 - Frontend Foundation
+**Goal**: Build custom hooks, API service, and all React components
+**Success Criteria**: Frontend renders URL input form, property cards with image carousels, and comparison view with localStorage persistence
+
+### Action Items
+
+- [x] 1. Create API service (`src/services/api.js`)
+- [x] 2. Create useLocalStorage hook (`src/hooks/useLocalStorage.js`)
+- [x] 3. Create usePropertyData hook (`src/hooks/usePropertyData.js`)
+- [x] 4. Create ImageCarousel component (`src/components/UI/ImageCarousel.jsx`)
+- [x] 5. Create PropertyCard component (`src/components/PropertyCard/PropertyCard.jsx`)
+- [x] 6. Create UrlInputForm component (`src/components/UrlInput/UrlInputForm.jsx`)
+- [x] 7. Create ComparisonContainer component (`src/components/ComparisonView/ComparisonContainer.jsx`)
+- [x] 8. Update App.jsx with full layout
+- [x] 9. Test: Vite dev server starts without errors
+- [x] 10. Test: All modules compile and serve correctly (HTTP 200)
+
+### Files Created/Modified
+
+**New files:**
+- ✓ `packages/frontend/src/services/api.js` (Axios client, 60s timeout, error handling)
+- ✓ `packages/frontend/src/hooks/useLocalStorage.js` (300ms debounce, JSON error handling)
+- ✓ `packages/frontend/src/hooks/usePropertyData.js` (loading/error state management)
+- ✓ `packages/frontend/src/components/UI/ImageCarousel.jsx` (Swiper.js, lazy loading, fallback)
+- ✓ `packages/frontend/src/components/PropertyCard/PropertyCard.jsx` (350px card, features tags, remove button)
+- ✓ `packages/frontend/src/components/UrlInput/UrlInputForm.jsx` (validation, spinner, clear on success)
+- ✓ `packages/frontend/src/components/ComparisonView/ComparisonContainer.jsx` (horizontal scroll, empty state)
+
+**Modified files:**
+- ✓ `packages/frontend/src/App.jsx` (full layout with hooks, handlers, error display)
+
+### Verification Results
+
+1. ✅ Vite dev server starts cleanly, no compilation errors
+2. ✅ HTML loads correctly at localhost
+3. ✅ All component modules serve with HTTP 200
+4. ✅ No Vite build warnings
+
+**Milestone 3 Status**: ✅ COMPLETE
+
+---
+
+## ✅ Completed: Milestone 4 - Bookmarklet Integration
+**Goal**: Replace Puppeteer scraping with browser bookmarklet approach (DataDome blocks automated browsers)
+**Success Criteria**: User can click bookmarklet on Idealista property page and data appears in the app
+
+### Architecture Change
+Puppeteer scraping was blocked by DataDome anti-bot protection. Pivoted to a browser bookmarklet that:
+1. Runs in the user's own browser session (no bot detection)
+2. Extracts property data from the Idealista DOM
+3. Opens the app via URL hash (`#import=BASE64_JSON`)
+4. App decodes hash and adds property to localStorage
+
+### Action Items
+
+- [x] 1. Create bookmarklet source code (`src/utils/bookmarklet.js`)
+- [x] 2. Create BookmarkletInstall component with drag-to-install link
+- [x] 3. Update App.jsx to handle `#import=` hash on mount and hashchange
+- [x] 4. Add import success/error/duplicate message UI
+- [x] 5. Fix `%23` encoding bug in minified bookmarklet URL
+- [x] 6. Test: Browse to Idealista property, click bookmarklet, verify data appears ✓
+- [x] 7. Test: Verify duplicate detection works ✓ (same property can't be added again)
+- [x] 8. Test: Refresh page - property persists (localStorage) ✓
+- [x] 9. Test: Add second property - appears alongside first ✓
+
+### Files Created/Modified
+
+**New files:**
+- ✓ `packages/frontend/src/utils/bookmarklet.js` (readable bookmarklet source)
+- ✓ `packages/frontend/src/components/BookmarkletInstall/BookmarkletInstall.jsx` (install UI)
+
+**Modified files:**
+- ✓ `packages/frontend/src/App.jsx` (hash import handler, BookmarkletInstall, import messages)
+
+### Verification Results
+
+1. ✅ Bookmarklet extracts property data from Idealista DOM correctly
+2. ✅ Data appears in comparison view automatically
+3. ✅ Duplicate detection prevents adding same property twice
+4. ✅ Properties persist across page refresh (localStorage)
+5. ✅ Multiple properties display side-by-side
+6. ✅ No console errors (React javascript: URL warning fixed via ref)
+
+**Milestone 4 Status**: ✅ COMPLETE
+
+---
+
 ## Completed Milestones
 1. ✅ Milestone 1: Project Bootstrap (Completed: 2026-02-05)
 2. ✅ Milestone 2: Backend Core - Web Scraping (Completed: 2026-02-06)
+3. ✅ Milestone 3: Frontend Foundation (Completed: 2026-02-06)
+4. ✅ Milestone 4: Bookmarklet Integration (Completed: 2026-02-06)
 
 ## Upcoming Milestones
-- Milestone 3: Frontend Foundation
-- Milestone 4: Frontend UI Components
 - Milestone 5: Integration & Testing
 - Milestone 6: Polish & Documentation
