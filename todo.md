@@ -63,11 +63,64 @@
 
 ---
 
+---
+
+## ✅ Completed: Milestone 2 - Backend Core - Web Scraping
+**Goal**: Implement working Puppeteer scraping service and API endpoint
+**Success Criteria**: Backend starts, API endpoints respond correctly, scraper handles CAPTCHA gracefully
+
+### Action Items
+
+- [x] 1. Create Winston logger utility (`src/utils/logger.js`)
+- [x] 2. Create URL validation utility (`src/utils/validation.js`)
+- [x] 3. Create error handling middleware (`src/middleware/error.middleware.js`)
+- [x] 4. Create Puppeteer scraping service (`src/services/puppeteer.service.js`)
+      - Stealth plugin for anti-bot evasion
+      - Visible browser mode (user solves CAPTCHA once)
+      - CAPTCHA detection and wait-for-resolution flow
+      - Extract: price, title, size, rooms, bathrooms, description, images, features
+      - Browser instance reuse, page cleanup in finally blocks
+- [x] 5. Create scraper controller (`src/controllers/scraper.controller.js`)
+- [x] 6. Create scraper routes (`src/routes/scraper.routes.js`)
+- [x] 7. Update server.js with rate limiting, routes, and error middleware
+- [x] 8. Test: Backend starts with `pnpm dev:backend`
+- [x] 9. Test: URL validation returns 400 for invalid/missing URLs
+- [x] 10. Test: Health and root endpoints respond correctly
+
+### Files Created/Modified
+
+**New files:**
+- ✓ `packages/backend/src/utils/logger.js` (Winston with timestamps)
+- ✓ `packages/backend/src/utils/validation.js` (Idealista URL regex + normalizer)
+- ✓ `packages/backend/src/middleware/error.middleware.js` (centralized error handler)
+- ✓ `packages/backend/src/services/puppeteer.service.js` (stealth + visible browser + CAPTCHA handling)
+- ✓ `packages/backend/src/controllers/scraper.controller.js` (POST handler with validation)
+- ✓ `packages/backend/src/routes/scraper.routes.js` (POST /property route)
+
+**Modified files:**
+- ✓ `packages/backend/src/server.js` (rate limiting, routes, error middleware, graceful shutdown)
+- ✓ `packages/backend/package.json` (added puppeteer-extra, puppeteer-extra-plugin-stealth)
+
+### Verification Results
+
+1. ✅ `pnpm dev:backend` starts without errors, Winston logs appear
+2. ✅ Root endpoint returns `{"success":true,"message":"IdealistaPlus Backend API"}`
+3. ✅ Health endpoint returns `{"success":true,"message":"API is healthy"}`
+4. ✅ Missing URL returns `{"success":false,"error":"URL is required."}`
+5. ✅ Invalid URL returns `{"success":false,"error":"Invalid URL..."}`
+6. ✅ CAPTCHA detection works - returns 503 with clear message
+
+**Note**: Live Idealista scraping blocked by DataDome CAPTCHA. Selector extraction will be validated during integration testing (Milestone 5).
+
+**Milestone 2 Status**: ✅ COMPLETE
+
+---
+
 ## Completed Milestones
 1. ✅ Milestone 1: Project Bootstrap (Completed: 2026-02-05)
+2. ✅ Milestone 2: Backend Core - Web Scraping (Completed: 2026-02-06)
 
 ## Upcoming Milestones
-- Milestone 2: Backend Core - Web Scraping
 - Milestone 3: Frontend Foundation
 - Milestone 4: Frontend UI Components
 - Milestone 5: Integration & Testing

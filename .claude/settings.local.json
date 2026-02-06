@@ -1,7 +1,69 @@
 {
   "permissions": {
     "allow": [
-      "Bash(dir:*)"
+      "Read",
+      "Write",
+      "Edit",
+      "Glob",
+      "Grep",
+      "NotebookEdit",
+      "TodoWrite",
+      "WebFetch",
+      "WebSearch",
+      "Bash(npm:*)",
+      "Bash(npx:*)",
+      "Bash(pnpm:*)",
+      "Bash(node:*)",
+      "Bash(git:*)",
+      "Bash(curl:*)",
+      "Bash(mkdir:*)",
+      "Bash(ls:*)",
+      "Bash(dir:*)",
+      "Bash(cd:*)",
+      "Bash(cat:*)",
+      "Bash(echo:*)",
+      "Bash(sleep:*)",
+      "Bash(tail:*)",
+      "Bash(head:*)",
+      "Bash(pwd:*)",
+      "Bash(which:*)",
+      "Bash(where:*)",
+      "Bash(cmdkey:*)",
+      "Bash(netstat:*)",
+      "Bash(findstr:*)"
+    ],
+    "deny": [
+      "Bash(rm:*)",
+      "Bash(rmdir:*)",
+      "Bash(del:*)",
+      "Bash(rd:*)",
+      "Bash(git push --force:*)",
+      "Bash(git reset --hard:*)",
+      "Bash(git clean:*)"
+    ],
+    "additionalDirectories": [
+      "d:\\Personal\\Professional\\Code\\IdealistaPlus\\packages\\backend\\src\\utils"
+    ]
+  },
+  "hooks": {
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/milestone-complete-check.js\"",
+            "timeout": 10,
+            "statusMessage": "Checking milestone status..."
+          },
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/milestone-git-commit.js\"",
+            "timeout": 10,
+            "statusMessage": "Checking for uncommitted changes..."
+          }
+        ]
+      }
     ]
   }
 }
