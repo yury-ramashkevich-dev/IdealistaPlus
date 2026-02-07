@@ -19,7 +19,6 @@ IdealistaPlus is a web application that enables users to compare multiple proper
 ### Monorepo Structure
 The project uses a monorepo approach with pnpm workspaces:
 - `packages/frontend/` - React application (Vite + Tailwind CSS)
-- `packages/backend/` - Express API server (currently unused due to DataDome anti-bot protection)
 
 ### Technology Stack
 
@@ -30,17 +29,13 @@ The project uses a monorepo approach with pnpm workspaces:
 - Swiper.js (image carousels with lazy loading)
 - Browser Bookmarklet (client-side data extraction)
 
-**Backend (currently inactive):**
-- Node.js 20+ LTS
-- Express (REST API)
-- Puppeteer (blocked by DataDome anti-bot protection)
-- express-rate-limit (API protection)
-- winston (logging)
+**Testing:**
+- Vitest (test runner)
+- React Testing Library (component testing)
+- jsdom (DOM environment for tests)
 
 **Development:**
 - pnpm (package manager with workspace support)
-- concurrently (run frontend + backend simultaneously)
-- nodemon (backend hot-reload)
 
 ## Project Structure
 
@@ -50,41 +45,40 @@ IdealistaPlus/
 ├── pnpm-workspace.yaml          # Workspace definition
 ├── PROJECT_SPECIFICATION.md     # Detailed implementation plan
 ├── CLAUDE.md                    # This file
+├── todo.md                      # Milestone tracker
 │
-├── packages/
-│   ├── frontend/               # React SPA
-│   │   ├── src/
-│   │   │   ├── App.jsx                                   # Main app component
-│   │   │   ├── hooks/
-│   │   │   │   └── useLocalStorage.js                    # localStorage persistence
-│   │   │   ├── utils/
-│   │   │   │   └── bookmarklet.js                        # Readable bookmarklet source
-│   │   │   └── components/
-│   │   │       ├── UI/ImageCarousel.jsx                  # Swiper carousel
-│   │   │       ├── BookmarkletInstall/BookmarkletInstall.jsx  # Bookmarklet UI
-│   │   │       └── ComparisonView/ComparisonContainer.jsx     # Table comparison layout
-│   │   ├── vite.config.js                                # Vite config
-│   │   └── tailwind.config.js
-│   │
-│   └── backend/                # Express API
-│       └── src/
-│           ├── server.js                      # Express entry point
-│           ├── services/
-│           │   └── puppeteer.service.js       # Core scraping logic
-│           ├── controllers/
-│           │   └── scraper.controller.js      # API handlers
-│           ├── routes/
-│           │   └── scraper.routes.js          # Route definitions
-│           ├── middleware/
-│           │   └── error.middleware.js        # Error handling
-│           └── utils/
-│               ├── validation.js              # URL validation
-│               └── logger.js                  # Winston logger
+└── packages/
+    └── frontend/               # React SPA
+        ├── src/
+        │   ├── App.jsx                                             # Main app component
+        │   ├── App.test.jsx                                        # App component tests
+        │   ├── main.jsx                                            # React entry point
+        │   ├── index.css                                           # Tailwind imports
+        │   ├── hooks/
+        │   │   ├── useLocalStorage.js                              # localStorage persistence
+        │   │   └── useLocalStorage.test.js                         # Hook tests
+        │   ├── utils/
+        │   │   └── bookmarklet.js                                  # Readable bookmarklet source
+        │   ├── test/
+        │   │   └── setup.js                                        # Vitest setup
+        │   └── components/
+        │       ├── UI/
+        │       │   ├── ImageCarousel.jsx                           # Swiper carousel
+        │       │   └── ImageCarousel.test.jsx                      # Carousel tests
+        │       ├── BookmarkletInstall/
+        │       │   ├── BookmarkletInstall.jsx                      # Bookmarklet UI
+        │       │   └── BookmarkletInstall.test.jsx                 # Install UI tests
+        │       └── ComparisonView/
+        │           ├── ComparisonContainer.jsx                     # Table comparison layout
+        │           └── ComparisonContainer.test.jsx                # Container tests
+        ├── vite.config.js                                          # Vite config
+        ├── vitest.config.js                                        # Vitest config
+        ├── tailwind.config.js                                      # Tailwind config
+        └── postcss.config.js                                       # PostCSS config
 ```
 
 ## Data Flow
 
-### Primary Flow (Bookmarklet)
 1. **User Action**: User navigates to Idealista property page and clicks bookmarklet in their bookmarks bar
 2. **Validation**: Bookmarklet checks if current page is valid Idealista property URL
 3. **Extraction**: JavaScript extracts property data directly from page DOM (price, title, size, rooms, bathrooms, type, year, orientation, energy data, images, features, description)
@@ -93,9 +87,6 @@ IdealistaPlus/
 6. **Decoding**: App detects hash parameter, decodes property data
 7. **Storage**: Property added to localStorage array
 8. **Display**: Property appears in comparison table
-
-### Secondary Flow (Backend - Currently Unused)
-The backend Puppeteer scraping was implemented but is blocked by Idealista's DataDome anti-bot protection. The bookmarklet approach circumvents this by running extraction in the user's actual browser session.
 
 ## Key Components
 
@@ -121,11 +112,6 @@ The primary data extraction mechanism that:
 - Construction Year: Regex pattern matching in features
 - Orientation: Direction keywords in features
 - Energy Data: `.details-property_certified-energy li`, `.icon-energy-certificate-*`
-
-### Backend: Puppeteer Scraping Service (Inactive)
-**File**: `packages/backend/src/services/puppeteer.service.js`
-
-Original scraping approach, now superseded by bookmarklet due to DataDome blocking. Kept in codebase for reference but not used in production flow.
 
 ### Frontend: useLocalStorage Hook
 **File**: `packages/frontend/src/hooks/useLocalStorage.js`
@@ -176,54 +162,16 @@ Main application orchestrator:
 ```bash
 # From project root
 pnpm install              # Install all dependencies
-pnpm dev                  # Start both frontend and backend
+pnpm dev                  # Start frontend dev server
 ```
 
-### Development Servers
-- **Frontend**: http://localhost:5173 (Vite dev server)
-- **Backend**: http://localhost:3001 (Express API - optional, not used in primary flow)
+### Development Server
+- **Frontend**: http://localhost:5173 (Vite dev server with hot module replacement)
 
-### Hot Reload
-- Frontend: Vite hot module replacement (instant)
-- Backend: nodemon restarts on file changes
-
-## API Endpoints
-
-### POST /api/scraper/property
-Scrapes property data from Idealista URL
-
-**Request**:
-```json
-{
-  "url": "https://www.idealista.com/inmueble/12345678/"
-}
-```
-
-**Response**:
-```json
-{
-  "success": true,
-  "data": {
-    "url": "https://www.idealista.com/inmueble/12345678/",
-    "price": "450.000 €",
-    "title": "Piso en calle Example, Barcelona",
-    "size": "85 m²",
-    "rooms": "3 hab.",
-    "bathrooms": "2 baños",
-    "description": "Property description...",
-    "images": ["https://img3.idealista.com/..."],
-    "features": ["Ascensor", "Aire acondicionado"],
-    "scrapedAt": "2026-02-05T12:34:56.789Z"
-  }
-}
-```
-
-**Error Response**:
-```json
-{
-  "success": false,
-  "error": "Invalid URL. Must be an Idealista property URL."
-}
+### Testing
+```bash
+pnpm test                 # Run tests in watch mode
+pnpm test:run             # Run tests once (CI mode)
 ```
 
 ## localStorage Schema
@@ -257,21 +205,15 @@ Scrapes property data from Idealista URL
 ## Important Implementation Notes
 
 ### Data Extraction Architecture
-1. **Bookmarklet Approach (Primary)**: Client-side extraction via browser bookmarklet
+1. **Bookmarklet Approach**: Client-side extraction via browser bookmarklet
    - Runs in user's authenticated browser session
-   - Bypasses DataDome anti-bot protection
+   - No backend required - fully client-side application
    - No rate limiting issues
    - Works with dynamic JavaScript-loaded content
    - Supports both English and Spanish Idealista pages
    - User must manually navigate to each property page
 
-2. **Backend Scraping (Deprecated)**: Puppeteer automated scraping
-   - Blocked by Idealista's DataDome anti-bot protection
-   - Even with realistic user-agents, delays, and headless Chrome configuration
-   - Kept in codebase for reference but not functional
-   - Would require CAPTCHA solving service or residential proxies to work
-
-3. **Selector Maintenance**: HTML structure may change over time
+2. **Selector Maintenance**: HTML structure may change over time
    - Update selectors in `packages/frontend/src/utils/bookmarklet.js`
    - Test on both Spanish and English Idealista pages
    - Use fallback selectors for robustness
@@ -292,8 +234,31 @@ Scrapes property data from Idealista URL
 
 ## Testing
 
+### Automated Test Suite
+The project includes 46 tests across 5 test files covering hooks, components, and main app logic.
+
+**Run tests:**
+```bash
+pnpm test                 # Watch mode (interactive)
+pnpm test:run             # CI mode (run once)
+```
+
+**Test files:**
+- `src/hooks/useLocalStorage.test.js` - 10 tests for localStorage hook
+- `src/components/ComparisonView/ComparisonContainer.test.jsx` - 12 tests for table layout
+- `src/components/UI/ImageCarousel.test.jsx` - 5 tests for Swiper carousel
+- `src/components/BookmarkletInstall/BookmarkletInstall.test.jsx` - 6 tests for install UI
+- `src/App.test.jsx` - 13 tests for app integration, hash import, auto-dismiss
+
+**Coverage areas:**
+- localStorage initialization, add, remove, clear, deduplication, debouncing
+- Table rendering, empty state, parameter rows, features/description cells
+- Image carousel rendering, lazy loading, empty state
+- Bookmarklet install UI, link href, copy button, instructions
+- App rendering, hash import decoding, auto-dismiss messages, clear all
+
 ### Manual Testing Flow
-1. Start frontend: `pnpm dev:frontend` (backend optional)
+1. Start frontend: `pnpm dev`
 2. Open http://localhost:5173
 3. Drag the green bookmarklet button to your bookmarks bar
 4. Navigate to an Idealista property page (e.g., https://www.idealista.com/inmueble/...)
@@ -344,31 +309,21 @@ Scrapes property data from Idealista URL
 
 ## Environment Variables
 
-### Backend (.env)
-```env
-PORT=3001
-NODE_ENV=development
-LOG_LEVEL=info
-```
-
-### Frontend (.env)
-No environment variables required (bookmarklet approach is self-contained)
+No environment variables required - the application is fully client-side with bookmarklet-based data extraction.
 
 ## Scripts Reference
 
 ### Root package.json
-- `pnpm dev` - Start frontend only (backend not required)
-- `pnpm dev:backend` - Start backend only (optional)
-- `pnpm dev:frontend` - Start frontend only
-
-### Backend package.json
-- `pnpm dev` - Start with nodemon (auto-reload)
-- `pnpm start` - Start in production mode
+- `pnpm dev` - Start frontend dev server
+- `pnpm test` - Run tests in watch mode
+- `pnpm test:run` - Run tests once (CI mode)
 
 ### Frontend package.json
 - `pnpm dev` - Start Vite dev server
 - `pnpm build` - Build for production
 - `pnpm preview` - Preview production build
+- `pnpm test` - Run Vitest in watch mode
+- `pnpm test:run` - Run Vitest once
 
 ## File Naming Conventions
 
@@ -391,16 +346,12 @@ No environment variables required (bookmarklet approach is self-contained)
 ## Deployment Considerations
 
 ### Frontend
-- Build: `pnpm --filter frontend build`
+- Build: `pnpm --filter frontend build` or `cd packages/frontend && pnpm build`
 - Deploy to: Vercel, Netlify, or any static hosting
 - Update bookmarklet code to point to production URL instead of `localhost:5173`
 - Pure static site - no backend required
 - No environment variables needed
-
-### Backend (Optional)
-- Not required for current bookmarklet-based flow
-- If implementing alternative scraping method, deploy to VPS with residential proxies or CAPTCHA solving service
-- Puppeteer blocked by DataDome without advanced anti-bot circumvention
+- Production build size: ~250 KB JS, ~25 KB CSS
 
 ## Support & Documentation
 
@@ -411,4 +362,4 @@ No environment variables required (bookmarklet approach is self-contained)
 ---
 
 **Last Updated**: 2026-02-07
-**Status**: Active Development - Bookmarklet Flow Implemented
+**Status**: Active Development - Milestone 5 Complete (Frontend-Only with Test Suite)

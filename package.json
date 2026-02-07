@@ -4,10 +4,9 @@
   "description": "Property comparison tool for Idealista listings",
   "private": true,
   "scripts": {
-    "dev": "concurrently \"pnpm run dev:backend\" \"pnpm run dev:frontend\"",
-    "dev:backend": "pnpm --filter backend dev",
-    "dev:frontend": "pnpm --filter frontend dev",
+    "dev": "pnpm --filter frontend dev",
     "build": "pnpm --filter frontend build",
+    "test": "pnpm --filter frontend test",
     "lint": "pnpm -r lint",
     "format": "prettier --write \"packages/**/*.{js,jsx,json,css,md}\""
   },
@@ -20,7 +19,6 @@
   "author": "",
   "license": "MIT",
   "devDependencies": {
-    "concurrently": "^8.2.2",
     "prettier": "^3.1.1"
   }
 }

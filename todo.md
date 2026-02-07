@@ -246,13 +246,65 @@ Puppeteer scraping was blocked by DataDome anti-bot protection. Pivoted to a bro
 
 ---
 
+## ✅ Completed: Milestone 5 - Dead Code Removal & Test Suite
+**Goal**: Remove unused backend/frontend code and add Vitest test suite
+**Success Criteria**: All dead code removed, 46 tests passing, production build succeeds
+
+### Action Items
+
+- [x] 1. Delete backend package (`packages/backend/`)
+- [x] 2. Delete unused frontend files (`usePropertyData.js`, `api.js`, `UrlInputForm.jsx`)
+- [x] 3. Remove `axios` dependency, `concurrently` devDependency
+- [x] 4. Remove Vite proxy config (no longer proxying to backend)
+- [x] 5. Update root `package.json` scripts (single frontend dev server)
+- [x] 6. Set up Vitest + React Testing Library + jsdom
+- [x] 7. Write `useLocalStorage.test.js` (10 tests: init, add, remove, clear, dedup, debounce)
+- [x] 8. Write `ComparisonContainer.test.jsx` (12 tests: empty state, table, cells, features, description)
+- [x] 9. Write `ImageCarousel.test.jsx` (5 tests: empty state, slides, lazy loading)
+- [x] 10. Write `BookmarkletInstall.test.jsx` (6 tests: link, href, copy, instructions)
+- [x] 11. Write `App.test.jsx` (13 tests: render, hash import, auto-dismiss, clear all)
+- [x] 12. Verify all tests pass and production build succeeds
+
+### Files Created/Modified
+
+**Deleted:**
+- ✓ `packages/backend/` (entire directory — 9 files)
+- ✓ `packages/frontend/src/hooks/usePropertyData.js`
+- ✓ `packages/frontend/src/services/api.js`
+- ✓ `packages/frontend/src/components/UrlInput/UrlInputForm.jsx`
+
+**New files:**
+- ✓ `packages/frontend/vitest.config.js`
+- ✓ `packages/frontend/src/test/setup.js`
+- ✓ `packages/frontend/src/hooks/useLocalStorage.test.js`
+- ✓ `packages/frontend/src/components/ComparisonView/ComparisonContainer.test.jsx`
+- ✓ `packages/frontend/src/components/UI/ImageCarousel.test.jsx`
+- ✓ `packages/frontend/src/components/BookmarkletInstall/BookmarkletInstall.test.jsx`
+- ✓ `packages/frontend/src/App.test.jsx`
+
+**Modified files:**
+- ✓ `package.json` (simplified scripts, removed concurrently)
+- ✓ `packages/frontend/package.json` (removed axios, added test deps)
+- ✓ `packages/frontend/vite.config.js` (removed proxy)
+
+### Verification Results
+
+1. ✅ 46 tests passing across 5 test files
+2. ✅ Production build succeeds (250 KB JS, 25 KB CSS)
+3. ✅ `pnpm dev` starts frontend only (no backend)
+4. ✅ `pnpm test` runs all tests via Vitest
+
+**Milestone 5 Status**: ✅ COMPLETE
+
+---
+
 ## Completed Milestones
 1. ✅ Milestone 1: Project Bootstrap (Completed: 2026-02-05)
 2. ✅ Milestone 2: Backend Core - Web Scraping (Completed: 2026-02-06)
 3. ✅ Milestone 3: Frontend Foundation (Completed: 2026-02-06)
 4. ✅ Milestone 4: Bookmarklet Integration (Completed: 2026-02-06)
 5. ✅ Milestone 4.1: Table-Based Comparison View (Completed: 2026-02-06)
+6. ✅ Milestone 5: Dead Code Removal & Test Suite (Completed: 2026-02-07)
 
 ## Upcoming Milestones
-- Milestone 5: Integration & Testing
 - Milestone 6: Polish & Documentation

@@ -6,30 +6,26 @@ A web application that allows users to compare Idealista properties side-by-side
 ## Architecture
 - **Frontend**: React 18+ with Vite, Tailwind CSS, Swiper.js for image carousels
 - **Data Extraction**: Browser bookmarklet (client-side JavaScript DOM extraction)
-- **Backend**: Node.js/Express API with Puppeteer (deprecated - blocked by DataDome anti-bot)
 - **Storage**: Browser localStorage (no database required)
-- **Structure**: Monorepo using pnpm workspaces
+- **Testing**: Vitest + React Testing Library (46 tests across 5 test files)
+- **Structure**: Monorepo using pnpm workspaces (frontend-only)
 
 ## Technology Stack
 
 ### Frontend
 - React 18.3+ (UI framework)
-- Vite 5+ (build tool - faster than CRA)
+- Vite 5+ (build tool)
 - Tailwind CSS 3.4+ (styling)
 - Swiper.js 11+ (image carousel with lazy loading)
 - Browser Bookmarklet (client-side data extraction)
 
-### Backend (Currently Unused)
-- Node.js 20+ LTS
-- Express 4.19+
-- Puppeteer 22+ (blocked by DataDome anti-bot protection)
-- express-rate-limit 7+ (prevent abuse)
-- winston 3+ (logging)
+### Testing
+- Vitest 3+ (test runner with Vite integration)
+- React Testing Library 16+ (component testing)
+- jsdom (DOM environment)
 
 ### Development Tools
 - pnpm 8+ (workspace management)
-- concurrently 8+ (run frontend + backend together)
-- nodemon 3+ (backend auto-reload)
 
 ## Project Structure
 
@@ -38,48 +34,40 @@ d:\Personal\Professional\Code\IdealistaPlus\
 ├── package.json                          # Root workspace config
 ├── pnpm-workspace.yaml                   # pnpm workspace definition
 ├── .gitignore
-├── README.md
+├── PROJECT_SPECIFICATION.md
+├── CLAUDE.md
+├── todo.md
 │
-├── packages/
-│   ├── frontend/                         # React application
-│   │   ├── package.json
-│   │   ├── vite.config.js               # Vite config with proxy
-│   │   ├── tailwind.config.js
-│   │   ├── postcss.config.js
-│   │   ├── index.html
-│   │   └── src/
-│   │       ├── main.jsx                  # React entry point
-│   │       ├── App.jsx                   # Main app component
-│   │       ├── index.css                 # Tailwind imports
-│   │       ├── hooks/
-│   │       │   └── useLocalStorage.js                    # localStorage persistence
-│   │       ├── utils/
-│   │       │   └── bookmarklet.js                        # Readable bookmarklet source
-│   │       └── components/
-│   │           ├── UI/
-│   │           │   └── ImageCarousel.jsx                 # Swiper.js carousel
-│   │           ├── BookmarkletInstall/
-│   │           │   └── BookmarkletInstall.jsx            # Bookmarklet install UI
-│   │           └── ComparisonView/
-│   │               └── ComparisonContainer.jsx           # Table comparison layout
-│   │
-│   └── backend/                          # Express API
-│       ├── package.json
-│       ├── nodemon.json
-│       ├── .env
-│       └── src/
-│           ├── server.js                 # Express app entry
-│           ├── services/
-│           │   └── puppeteer.service.js  # Core scraping logic
-│           ├── controllers/
-│           │   └── scraper.controller.js # API endpoint logic
-│           ├── routes/
-│           │   └── scraper.routes.js     # Route definitions
-│           ├── middleware/
-│           │   └── error.middleware.js   # Error handling
-│           └── utils/
-│               ├── validation.js         # URL validation
-│               └── logger.js             # Winston logger setup
+└── packages/
+    └── frontend/                         # React application
+        ├── package.json
+        ├── vite.config.js                # Vite config
+        ├── vitest.config.js              # Vitest config
+        ├── tailwind.config.js
+        ├── postcss.config.js
+        ├── index.html
+        └── src/
+            ├── main.jsx                  # React entry point
+            ├── App.jsx                   # Main app component
+            ├── App.test.jsx              # App integration tests
+            ├── index.css                 # Tailwind imports
+            ├── hooks/
+            │   ├── useLocalStorage.js                    # localStorage persistence
+            │   └── useLocalStorage.test.js               # Hook unit tests
+            ├── utils/
+            │   └── bookmarklet.js                        # Readable bookmarklet source
+            ├── test/
+            │   └── setup.js                              # Vitest setup
+            └── components/
+                ├── UI/
+                │   ├── ImageCarousel.jsx                 # Swiper.js carousel
+                │   └── ImageCarousel.test.jsx            # Carousel tests
+                ├── BookmarkletInstall/
+                │   ├── BookmarkletInstall.jsx            # Bookmarklet install UI
+                │   └── BookmarkletInstall.test.jsx       # Install UI tests
+                └── ComparisonView/
+                    ├── ComparisonContainer.jsx           # Table comparison layout
+                    └── ComparisonContainer.test.jsx      # Container tests
 ```
 
 ## Implementation Phases
@@ -343,27 +331,24 @@ export default defineConfig({
 
 ## Critical Files to Create
 
-### Frontend (10 files)
+### Frontend (17 files)
 1. `packages/frontend/src/App.jsx` - Main application component with hash import logic
-2. `packages/frontend/src/main.jsx` - React entry point
-3. `packages/frontend/src/index.css` - Tailwind imports
-4. `packages/frontend/src/hooks/useLocalStorage.js` - localStorage hook
-5. `packages/frontend/src/utils/bookmarklet.js` - Readable bookmarklet source code
-6. `packages/frontend/src/components/UI/ImageCarousel.jsx` - Swiper carousel
-7. `packages/frontend/src/components/BookmarkletInstall/BookmarkletInstall.jsx` - Bookmarklet UI with minified code
-8. `packages/frontend/src/components/ComparisonView/ComparisonContainer.jsx` - Table comparison layout
-9. `packages/frontend/tailwind.config.js` - Tailwind configuration
-10. `packages/frontend/vite.config.js` - Vite configuration
-
-### Backend (8 files - Optional/Reference Only)
-1. `packages/backend/src/server.js` - Express app entry point
-2. `packages/backend/src/services/puppeteer.service.js` - Core scraping logic (blocked by DataDome)
-3. `packages/backend/src/controllers/scraper.controller.js` - API endpoint handler
-4. `packages/backend/src/routes/scraper.routes.js` - Route definitions
-5. `packages/backend/src/middleware/error.middleware.js` - Error handling
-6. `packages/backend/src/utils/validation.js` - URL validation
-7. `packages/backend/src/utils/logger.js` - Winston logger
-8. `packages/backend/.env` - Environment variables
+2. `packages/frontend/src/App.test.jsx` - App integration tests (13 tests)
+3. `packages/frontend/src/main.jsx` - React entry point
+4. `packages/frontend/src/index.css` - Tailwind imports
+5. `packages/frontend/src/hooks/useLocalStorage.js` - localStorage hook
+6. `packages/frontend/src/hooks/useLocalStorage.test.js` - Hook tests (10 tests)
+7. `packages/frontend/src/utils/bookmarklet.js` - Readable bookmarklet source code
+8. `packages/frontend/src/test/setup.js` - Vitest setup file
+9. `packages/frontend/src/components/UI/ImageCarousel.jsx` - Swiper carousel
+10. `packages/frontend/src/components/UI/ImageCarousel.test.jsx` - Carousel tests (5 tests)
+11. `packages/frontend/src/components/BookmarkletInstall/BookmarkletInstall.jsx` - Bookmarklet UI with minified code
+12. `packages/frontend/src/components/BookmarkletInstall/BookmarkletInstall.test.jsx` - Install UI tests (6 tests)
+13. `packages/frontend/src/components/ComparisonView/ComparisonContainer.jsx` - Table comparison layout
+14. `packages/frontend/src/components/ComparisonView/ComparisonContainer.test.jsx` - Container tests (12 tests)
+15. `packages/frontend/tailwind.config.js` - Tailwind configuration
+16. `packages/frontend/vite.config.js` - Vite configuration
+17. `packages/frontend/vitest.config.js` - Vitest configuration
 
 ### Root (3 files)
 1. `package.json` - Workspace configuration and scripts
