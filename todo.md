@@ -203,11 +203,55 @@ Puppeteer scraping was blocked by DataDome anti-bot protection. Pivoted to a bro
 
 ---
 
+## ✅ Completed: Milestone 4.1 - Table-Based Comparison View
+**Goal**: Redesign comparison view from card-based to table/grid layout for easier side-by-side comparison
+**Success Criteria**: Properties displayed in columns with fixed parameter labels on the left, horizontally scrollable
+
+### Action Items
+
+- [x] 1. Rewrite ComparisonContainer as `<table>` with sticky left column
+- [x] 2. Render header row with image carousels, titles, and remove buttons
+- [x] 3. Render parameter rows (Price, Type, Size, Rooms, Bathrooms, Year, Orientation, Consumption, Emissions, Features, Description)
+- [x] 4. Handle special rendering: features as tags, description with truncation
+- [x] 5. Keep empty state when no properties
+- [x] 6. Remove PropertyCard.jsx (replaced by table layout)
+- [x] 7. Update bookmarklet to extract new fields (propertyType, constructionYear, orientation, energyConsumption, emissions)
+- [x] 8. Add bilingual keyword matching (English + Spanish) for all extracted fields
+- [x] 9. Fix z-index layering for sticky column vs remove buttons
+- [x] 10. Test: Table layout with 2-3 properties, horizontal scroll, sticky labels ✓
+
+### Files Created/Modified
+
+**Modified files:**
+- ✓ `packages/frontend/src/components/ComparisonView/ComparisonContainer.jsx` (table layout with 11 parameter rows)
+- ✓ `packages/frontend/src/utils/bookmarklet.js` (new fields, bilingual extraction)
+- ✓ `packages/frontend/src/components/BookmarkletInstall/BookmarkletInstall.jsx` (updated minified bookmarklet)
+
+**Deleted files:**
+- ✓ `packages/frontend/src/components/PropertyCard/PropertyCard.jsx` (replaced by table layout)
+
+### Verification Results
+
+1. ✅ Table layout renders with fixed 300px property columns
+2. ✅ Sticky left column stays visible during horizontal scroll
+3. ✅ Image carousels work in column headers
+4. ✅ Remove (×) button removes column, hidden behind sticky column on scroll
+5. ✅ Features render as green pill badges with "+N more" toggle
+6. ✅ Description truncates with "Show more" toggle
+7. ✅ Empty state displays correctly
+8. ✅ New fields (type, year, orientation, energy, emissions) extract and display correctly
+9. ✅ Bilingual extraction works for both English and Spanish Idealista pages
+
+**Milestone 4.1 Status**: ✅ COMPLETE
+
+---
+
 ## Completed Milestones
 1. ✅ Milestone 1: Project Bootstrap (Completed: 2026-02-05)
 2. ✅ Milestone 2: Backend Core - Web Scraping (Completed: 2026-02-06)
 3. ✅ Milestone 3: Frontend Foundation (Completed: 2026-02-06)
 4. ✅ Milestone 4: Bookmarklet Integration (Completed: 2026-02-06)
+5. ✅ Milestone 4.1: Table-Based Comparison View (Completed: 2026-02-06)
 
 ## Upcoming Milestones
 - Milestone 5: Integration & Testing

@@ -1,11 +1,12 @@
 # Idealista Property Comparison Application - Implementation Plan
 
 ## Overview
-A web application that allows users to compare Idealista properties side-by-side by pasting property URLs. The app will extract key information (price, size, rooms, images) via web scraping and display properties in horizontally scrollable columns with localStorage persistence.
+A web application that allows users to compare Idealista properties side-by-side using a browser bookmarklet. The app extracts comprehensive property information (price, size, rooms, type, year, orientation, energy data, images, features) via client-side JavaScript extraction and displays properties in a horizontally scrollable comparison table with localStorage persistence.
 
 ## Architecture
 - **Frontend**: React 18+ with Vite, Tailwind CSS, Swiper.js for image carousels
-- **Backend**: Node.js/Express API with Puppeteer for web scraping
+- **Data Extraction**: Browser bookmarklet (client-side JavaScript DOM extraction)
+- **Backend**: Node.js/Express API with Puppeteer (deprecated - blocked by DataDome anti-bot)
 - **Storage**: Browser localStorage (no database required)
 - **Structure**: Monorepo using pnpm workspaces
 
@@ -16,12 +17,12 @@ A web application that allows users to compare Idealista properties side-by-side
 - Vite 5+ (build tool - faster than CRA)
 - Tailwind CSS 3.4+ (styling)
 - Swiper.js 11+ (image carousel with lazy loading)
-- Axios 1.6+ (HTTP client)
+- Browser Bookmarklet (client-side data extraction)
 
-### Backend
+### Backend (Currently Unused)
 - Node.js 20+ LTS
 - Express 4.19+
-- Puppeteer 22+ (web scraping for JavaScript-rendered content)
+- Puppeteer 22+ (blocked by DataDome anti-bot protection)
 - express-rate-limit 7+ (prevent abuse)
 - winston 3+ (logging)
 
@@ -51,19 +52,16 @@ d:\Personal\Professional\Code\IdealistaPlus\
 │   │       ├── App.jsx                   # Main app component
 │   │       ├── index.css                 # Tailwind imports
 │   │       ├── hooks/
-│   │       │   ├── useLocalStorage.js    # localStorage persistence
-│   │       │   └── usePropertyData.js    # API calls for scraping
-│   │       ├── services/
-│   │       │   └── api.js                # Axios API client
+│   │       │   └── useLocalStorage.js                    # localStorage persistence
+│   │       ├── utils/
+│   │       │   └── bookmarklet.js                        # Readable bookmarklet source
 │   │       └── components/
 │   │           ├── UI/
-│   │           │   └── ImageCarousel.jsx # Swiper.js carousel
-│   │           ├── PropertyCard/
-│   │           │   └── PropertyCard.jsx  # Single property display
-│   │           ├── UrlInput/
-│   │           │   └── UrlInputForm.jsx  # URL input with validation
+│   │           │   └── ImageCarousel.jsx                 # Swiper.js carousel
+│   │           ├── BookmarkletInstall/
+│   │           │   └── BookmarkletInstall.jsx            # Bookmarklet install UI
 │   │           └── ComparisonView/
-│   │               └── ComparisonContainer.jsx  # Horizontal scroll container
+│   │               └── ComparisonContainer.jsx           # Table comparison layout
 │   │
 │   └── backend/                          # Express API
 │       ├── package.json
@@ -144,43 +142,36 @@ pnpm install -D nodemon
 - `packages/frontend/.env` (VITE_API_URL=http://localhost:3001/api)
 - `README.md` with setup instructions
 
-### Phase 2: Backend Development (Days 2-3)
+### Phase 2: Data Extraction Implementation (Days 2-3)
 
-**2.1 Create Express Server** - `packages/backend/src/server.js`
-- Setup Express with CORS (allow http://localhost:5173)
-- Add rate limiting (50 requests per 15 minutes)
-- Register scraper routes
-- Add error handling middleware
+**2.1 Create Bookmarklet** - `packages/frontend/src/utils/bookmarklet.js`
+- Validate page is Idealista property URL (`/inmueble/` in path)
+- Extract property data using DOM selectors:
+  - Price: `.info-data-price`, `.price-row`
+  - Title: `.main-info__title-main`, `.main-info__title`
+  - Size, rooms, bathrooms: `.info-features span` (with Spanish/English detection)
+  - Property type: Extract from features or title keywords
+  - Construction year: Regex pattern matching for 4-digit year
+  - Orientation: North/south/east/west keywords in features
+  - Energy consumption: `.details-property_certified-energy li`, consumption patterns
+  - Emissions: CO2 emission patterns in energy data
+  - Images: `.detail-multimedia img`, `.carousel-img`, `picture source`
+  - Features: `.details-property_features li`
+  - Description: `.comment .adCommentsBody`
+- Base64-encode extracted data
+- Open app with `#import=BASE64_JSON` hash parameter
 
-**2.2 Implement Puppeteer Scraping Service** - `packages/backend/src/services/puppeteer.service.js`
-- Browser initialization with anti-bot settings (proper user-agent, viewport)
-- Navigate to Idealista property URL
-- Wait for key elements to load (`.info-data-price`)
-- Extract property data using page.evaluate():
-  - Price (`.info-data-price`)
-  - Title/Location (`.main-info__title-main`)
-  - Size, rooms, bathrooms (`.info-features span`)
-  - Images (handle JavaScript-hidden URLs)
-  - Features (`.details-property_features li`)
-  - Description (`.comment`)
-- Return structured property object
-- Close page after scraping (prevent memory leaks)
+**2.2 Create Bookmarklet UI Component** - `packages/frontend/src/components/BookmarkletInstall/BookmarkletInstall.jsx`
+- Draggable bookmarklet button (green, Idealista branding)
+- Step-by-step installation instructions
+- Minified bookmarklet code as `javascript:` URL
+- Fallback copy-to-clipboard for mobile
+- Set href imperatively to avoid React warnings
 
-**Key Implementation Details:**
-- Reuse browser instance across requests (don't launch new browser per scrape)
-- Set 30-60 second timeout for scraping
-- Handle dynamic content with `waitForSelector` and `networkidle2`
-- Extract images from JavaScript variables if needed
-
-**2.3 Create API Endpoints**
-- `packages/backend/src/controllers/scraper.controller.js` - Handle POST /api/scraper/property
-- `packages/backend/src/routes/scraper.routes.js` - Define routes
-- `packages/backend/src/utils/validation.js` - Validate URL is from idealista.com/inmueble/
-- `packages/backend/src/middleware/error.middleware.js` - Centralized error handling
-
-**2.4 Add Logging**
-- `packages/backend/src/utils/logger.js` - Winston logger setup
-- Log scraping attempts, errors, and performance metrics
+**2.3 Backend (Optional/Deprecated)**
+- Puppeteer implementation kept for reference
+- Blocked by DataDome anti-bot protection
+- Not functional without CAPTCHA solving or residential proxies
 
 ### Phase 3: Frontend Development (Days 4-6)
 
@@ -217,18 +208,14 @@ export default {
 - Auto-save with 300ms debounce
 - Handle JSON parse/stringify errors gracefully
 
-`packages/frontend/src/hooks/usePropertyData.js`:
-- Call backend scraping API
-- Manage loading and error states
-- Return fetchProperty function
+**3.3 Hash Import Logic**
 
-**3.3 Create API Service**
-
-`packages/frontend/src/services/api.js`:
-- Axios instance with baseURL (http://localhost:3001/api)
-- 60-second timeout for scraping operations
-- POST /scraper/property endpoint function
-- Error handling with user-friendly messages
+In `packages/frontend/src/App.jsx`:
+- Detect `#import=BASE64_JSON` hash parameter on mount
+- Decode base64 and parse JSON property data
+- Add to properties array and save to localStorage
+- Clear hash from URL after import
+- Handle decode/parse errors gracefully
 
 **3.4 Build React Components**
 
@@ -238,40 +225,44 @@ export default {
 - Lazy loading for performance
 - Fallback for no images available
 
-`packages/frontend/src/components/PropertyCard/PropertyCard.jsx`:
-- Display property images at top (ImageCarousel)
-- Show key parameters: price (large, green), title, size, rooms, bathrooms
-- List features as tags (first 5, show "+X more" if more exist)
-- Remove button (X in top-right corner)
-- "View on Idealista →" link
-- Fixed width: 350px for consistent layout
-
-`packages/frontend/src/components/UrlInput/UrlInputForm.jsx`:
-- Input field for Idealista URL
-- "Add Property" button
-- Client-side URL validation (must include idealista.com and /inmueble/)
-- Show loading spinner during scraping
-- Display error messages
-- Clear input on success
+`packages/frontend/src/components/BookmarkletInstall/BookmarkletInstall.jsx`:
+- Draggable green bookmarklet button
+- Installation instructions (drag to bookmarks bar)
+- Minified bookmarklet code
+- Copy-to-clipboard fallback
 
 `packages/frontend/src/components/ComparisonView/ComparisonContainer.jsx`:
-- Horizontal scrollable container (overflow-x-auto)
-- Display PropertyCard components in a row with gap
-- Empty state: "No properties to compare yet" with icon
-- Smooth scrolling behavior
+- HTML `<table>` with fixed column widths
+- Sticky left column for parameter labels
+- Each property as table column (300px width)
+- 11 comparison rows:
+  - Price
+  - Type (propertyType)
+  - Size
+  - Rooms
+  - Bathrooms
+  - Year built (constructionYear)
+  - Orientation
+  - Consumption (energyConsumption)
+  - Emissions
+  - Features (tags with show more/less)
+  - Description (collapsible with show more/less)
+- Image carousel at top of each property column
+- Remove button overlaid on carousel
+- Title as clickable link to Idealista
+- Empty state with bookmarklet instructions
 
 **3.5 Create Main App Component**
 
 `packages/frontend/src/App.jsx`:
 - Use useLocalStorage hook to persist properties array
-- Use usePropertyData hook for API calls
+- Detect and decode `#import=BASE64_JSON` hash on mount
 - Header with title and "Clear All" button
-- UrlInputForm for adding properties
-- Error display section
+- BookmarkletInstall component for user onboarding
 - ComparisonContainer with all properties
-- handleAddProperty: Validate not duplicate, fetch data, add to array
 - handleRemoveProperty: Filter out by URL
 - handleClearAll: Confirm, then clear array
+- No URL input form (replaced by bookmarklet)
 
 **3.6 Configure Vite**
 
@@ -283,13 +274,8 @@ import react from '@vitejs/plugin-react';
 export default defineConfig({
   plugins: [react()],
   server: {
-    port: 5173,
-    proxy: {
-      '/api': {
-        target: 'http://localhost:3001',
-        changeOrigin: true,
-      }
-    }
+    port: 5173
+    // No proxy needed - bookmarklet approach doesn't use backend
   }
 });
 ```
@@ -302,29 +288,35 @@ export default defineConfig({
 - Test hot-reloading works for both
 
 **4.2 Manual Testing Checklist**
-- [ ] Add valid Idealista property URL - data appears correctly
+- [ ] Drag bookmarklet to bookmarks bar successfully
+- [ ] Navigate to Idealista property page
+- [ ] Click bookmarklet - app opens with property imported
+- [ ] Verify all 11 data fields extracted correctly (including new fields: type, year, orientation, consumption, emissions)
 - [ ] Verify images load and carousel works
-- [ ] Try invalid URL - error message appears
-- [ ] Try duplicate URL - error message appears
-- [ ] Add 3-5 properties - horizontal scroll works
+- [ ] Test on Spanish Idealista page - data extracts correctly
+- [ ] Test on English Idealista page - data extracts correctly
+- [ ] Click bookmarklet on non-property page - shows error alert
+- [ ] Add 3-5 properties - horizontal scroll works in table
 - [ ] Refresh page - properties persist from localStorage
-- [ ] Remove property - updates immediately
+- [ ] Remove property via X button - updates immediately
 - [ ] Clear all - confirmation dialog, then clears
-- [ ] Test rate limiting - 50 requests work, 51st gets 429 error
 - [ ] Test mobile responsive design
 
 **4.3 Error Handling Tests**
-- Invalid Idealista URL format
-- Non-existent property (404 on Idealista)
-- Network timeout
-- Idealista anti-bot detection
+- Clicking bookmarklet on non-Idealista page
+- Clicking bookmarklet on Idealista search results (not property page)
+- Property page with missing data fields (some fields null)
+- Malformed hash import parameter
 - localStorage quota exceeded (unlikely but possible)
+- Browser blocking `javascript:` URLs (some browsers require user approval)
 
 **4.4 Performance Verification**
-- Image lazy loading working (check Network tab)
-- No memory leaks (Puppeteer pages/browser properly closed)
+- Image lazy loading working in carousel (check Network tab)
+- Bookmarklet extraction is instant (<1 second)
+- App opens quickly with imported data
 - Fast initial load (<3 seconds)
-- Smooth scrolling with multiple properties
+- Smooth horizontal scrolling in table with multiple properties
+- Table rendering performant with fixed column widths
 
 ### Phase 5: Polish & Documentation (Day 9)
 
@@ -351,29 +343,27 @@ export default defineConfig({
 
 ## Critical Files to Create
 
-### Backend (8 files)
+### Frontend (10 files)
+1. `packages/frontend/src/App.jsx` - Main application component with hash import logic
+2. `packages/frontend/src/main.jsx` - React entry point
+3. `packages/frontend/src/index.css` - Tailwind imports
+4. `packages/frontend/src/hooks/useLocalStorage.js` - localStorage hook
+5. `packages/frontend/src/utils/bookmarklet.js` - Readable bookmarklet source code
+6. `packages/frontend/src/components/UI/ImageCarousel.jsx` - Swiper carousel
+7. `packages/frontend/src/components/BookmarkletInstall/BookmarkletInstall.jsx` - Bookmarklet UI with minified code
+8. `packages/frontend/src/components/ComparisonView/ComparisonContainer.jsx` - Table comparison layout
+9. `packages/frontend/tailwind.config.js` - Tailwind configuration
+10. `packages/frontend/vite.config.js` - Vite configuration
+
+### Backend (8 files - Optional/Reference Only)
 1. `packages/backend/src/server.js` - Express app entry point
-2. `packages/backend/src/services/puppeteer.service.js` - Core scraping logic
+2. `packages/backend/src/services/puppeteer.service.js` - Core scraping logic (blocked by DataDome)
 3. `packages/backend/src/controllers/scraper.controller.js` - API endpoint handler
 4. `packages/backend/src/routes/scraper.routes.js` - Route definitions
 5. `packages/backend/src/middleware/error.middleware.js` - Error handling
 6. `packages/backend/src/utils/validation.js` - URL validation
 7. `packages/backend/src/utils/logger.js` - Winston logger
 8. `packages/backend/.env` - Environment variables
-
-### Frontend (12 files)
-1. `packages/frontend/src/App.jsx` - Main application component
-2. `packages/frontend/src/main.jsx` - React entry point
-3. `packages/frontend/src/index.css` - Tailwind imports
-4. `packages/frontend/src/hooks/useLocalStorage.js` - localStorage hook
-5. `packages/frontend/src/hooks/usePropertyData.js` - API hook
-6. `packages/frontend/src/services/api.js` - Axios client
-7. `packages/frontend/src/components/UI/ImageCarousel.jsx` - Swiper carousel
-8. `packages/frontend/src/components/PropertyCard/PropertyCard.jsx` - Property display
-9. `packages/frontend/src/components/UrlInput/UrlInputForm.jsx` - URL input
-10. `packages/frontend/src/components/ComparisonView/ComparisonContainer.jsx` - Comparison layout
-11. `packages/frontend/tailwind.config.js` - Tailwind configuration
-12. `packages/frontend/vite.config.js` - Vite configuration with proxy
 
 ### Root (3 files)
 1. `package.json` - Workspace configuration and scripts
@@ -393,6 +383,11 @@ export default defineConfig({
     "size": "85 m²",
     "rooms": "3 hab.",
     "bathrooms": "2 baños",
+    "propertyType": "Piso",                          // NEW: flat, apartment, house, etc.
+    "constructionYear": "2020",                      // NEW: year built
+    "orientation": "South",                          // NEW: north/south/east/west
+    "energyConsumption": "120 kWh/m² year",         // NEW: energy certificate
+    "emissions": "25 kg CO₂/m² year",               // NEW: CO2 emissions
     "description": "Full property description...",
     "images": [
       "https://img3.idealista.com/blur/WEB_DETAIL/0/id.prop_detail.jpeg",
@@ -410,107 +405,126 @@ export default defineConfig({
 
 ## Key Technical Considerations
 
-### Web Scraping Challenges
-1. **Anti-Bot Protection**: Idealista may block automated requests
-   - Use realistic user-agent and browser settings
-   - Add 2-5 second delays between requests
-   - Consider rotating user-agents if needed
+### Data Extraction Challenges
+1. **Anti-Bot Protection (Backend Approach - Failed)**:
+   - Idealista uses DataDome anti-bot protection
+   - Blocks Puppeteer/automated browsers even with realistic settings
+   - Would require CAPTCHA solving service or residential proxies
+   - **Solution**: Switched to bookmarklet approach
 
-2. **Dynamic Content**: Images and data loaded via JavaScript
-   - Use Puppeteer (not Cheerio) for JavaScript rendering
-   - Wait for selectors with `waitForSelector`
-   - Extract image URLs from JavaScript variables
+2. **Bookmarklet Approach (Current)**:
+   - Runs in user's actual browser session (bypasses anti-bot)
+   - No rate limiting concerns (user manually navigates)
+   - Works with dynamic JavaScript-loaded content
+   - Must handle both Spanish and English page variations
+   - User must be on Idealista property page when clicking bookmarklet
 
-3. **Rate Limiting**: Prevent server abuse
-   - Backend: 50 requests per 15 minutes per IP
-   - Client-side: Debounce URL submissions
+3. **Dynamic Content**: Images and data loaded via JavaScript
+   - Bookmarklet runs after page fully loads
+   - Access to all DOM elements and JavaScript variables
+   - Extract images from multiple sources (img tags, picture sources, data attributes)
 
 4. **Selector Changes**: Idealista HTML may change
    - Use multiple selector strategies (primary + fallback)
-   - Log errors for monitoring
-   - Plan for periodic maintenance
+   - Test on both Spanish (.es) and English Idealista sites
+   - Plan for periodic maintenance of bookmarklet selectors
+   - Readable source in `bookmarklet.js` for easy updates
 
 ### Performance Optimization
 1. **Frontend**:
    - Lazy load images with Swiper.js
    - Debounce localStorage writes (300ms)
-   - Use React.memo for PropertyCard if performance issues
+   - Table uses fixed column widths for consistent rendering
+   - React re-renders optimized by stable property keys (URL)
 
-2. **Backend**:
-   - Reuse Puppeteer browser instance (critical!)
-   - Close pages after scraping to free memory
-   - Set timeout limits (30-60 seconds)
+2. **Bookmarklet**:
+   - Minified to reduce size (<10KB)
+   - Synchronous DOM extraction (instant)
+   - Base64 encoding happens in user's browser
+   - Opens app in new window without blocking current page
 
-### CORS & Security
-- Backend CORS: Allow only frontend origin
-- Rate limiting on all API endpoints
-- URL validation on both client and server
-- No sensitive data in localStorage
+### Security & Privacy
+- **Data Privacy**: All extraction happens in user's browser, no external transmission
+- **localStorage Only**: Property data never sent to backend or external servers
+- **URL Validation**: Bookmarklet checks page URL before extraction
+- **No Authentication**: Purely client-side application, no user accounts
+- **Open Source**: Bookmarklet code is readable and auditable
+- **No Sensitive Data**: Only public property listing data stored in localStorage
 
 ## Verification & Testing
 
 ### End-to-End Test Flow
-1. **Setup**: Run `pnpm dev` from root directory
+1. **Setup**: Run `pnpm dev:frontend` from root directory
 2. **Access**: Open http://localhost:5173 in browser
-3. **Add Property**:
-   - Paste valid Idealista URL (e.g., https://www.idealista.com/inmueble/12345678/)
-   - Click "Add Property"
-   - Verify loading spinner appears
-   - Wait for property to appear in comparison view
-4. **Verify Property Display**:
-   - Images appear and carousel works
-   - Price, title, size, rooms, bathrooms displayed
-   - Features listed
-   - "View on Idealista" link works
-5. **Test Persistence**:
+3. **Install Bookmarklet**:
+   - Drag green "+ IdealistaPlus" button to bookmarks bar
+   - Verify bookmarklet appears in bookmarks
+4. **Add Property**:
+   - Navigate to Idealista property page (e.g., https://www.idealista.com/inmueble/12345678/)
+   - Click "IdealistaPlus" bookmarklet in bookmarks bar
+   - App opens in new window/tab with property imported
+5. **Verify Property Display**:
+   - Property appears as column in comparison table
+   - Images appear in carousel at top
+   - All 11 rows populated: Price, Type, Size, Rooms, Bathrooms, Year, Orientation, Consumption, Emissions, Features, Description
+   - Title is clickable link to Idealista
+   - Features displayed as green tags
+   - Description truncated with "Show more" button
+6. **Test Persistence**:
    - Refresh browser (F5)
    - Verify property still appears (localStorage working)
-6. **Test Multiple Properties**:
-   - Add 2-3 more properties
-   - Verify horizontal scroll works
-   - All properties aligned side-by-side
-7. **Test Remove**:
-   - Click X button on a property
-   - Verify it's removed immediately
-8. **Test Clear All**:
+7. **Test Multiple Properties**:
+   - Navigate to 2-3 more Idealista properties
+   - Click bookmarklet on each
+   - Verify horizontal scroll works in table
+   - All properties aligned as columns
+8. **Test Remove**:
+   - Click X button overlaid on property's image carousel
+   - Verify property column removed immediately
+9. **Test Clear All**:
    - Click "Clear All" button
    - Confirm dialog appears
    - Verify all properties removed
 
-### API Testing
-```bash
-# Test scraping endpoint directly
-curl -X POST http://localhost:3001/api/scraper/property \
-  -H "Content-Type: application/json" \
-  -d '{"url":"https://www.idealista.com/inmueble/12345678/"}'
+### Bookmarklet Testing
+```javascript
+// Test bookmarklet extraction in browser console
+// 1. Navigate to Idealista property page
+// 2. Open browser DevTools console
+// 3. Paste readable bookmarklet code from packages/frontend/src/utils/bookmarklet.js
+// 4. Execute code
+// 5. Check that app opens with property data
 
-# Should return:
-# {
-#   "success": true,
-#   "data": { /* property object */ }
-# }
+// Or test extraction only (without opening app):
+// Replace window.open() with console.log() in bookmarklet code
+// Verify extracted data object in console
 ```
 
 ### Error Handling Tests
-- Invalid URL: Should show "Please enter a valid Idealista property URL"
-- Duplicate URL: Should show "This property is already in your comparison"
-- Network error: Should show "Failed to scrape property"
-- Rate limit exceeded: Should show appropriate error message
+- Click bookmarklet on non-Idealista page: Should show alert "Please navigate to an Idealista property page first"
+- Click bookmarklet on Idealista search page (not property): Should show alert
+- Property with missing fields: Table cells show "—" for null values
+- Malformed hash import: App handles gracefully without crashing
+- Browser blocks javascript: URLs: User must approve in browser settings
 
 ### Performance Checks
 - Open DevTools → Network tab
-- Verify images lazy load (only visible images loaded initially)
-- Check memory usage doesn't grow over time
-- Verify backend logs show browser reuse (not launching new browser per request)
+- Verify images lazy load in carousel (only visible images loaded initially)
+- Bookmarklet extraction is instant (<1 second)
+- App import from hash is fast (<500ms)
+- Table scrolling is smooth with 5+ properties
+- No memory leaks (check with multiple imports)
 
 ## Estimated Timeline
 - **Day 1**: Project setup, initialize monorepo, install dependencies
-- **Days 2-3**: Backend development, implement Puppeteer scraping
-- **Days 4-6**: Frontend development, React components, Tailwind styling
-- **Days 7-8**: Integration testing, bug fixes, error handling
+- **Days 2-3**: Bookmarklet development, data extraction logic, hash import
+- **Days 4-6**: Frontend development, React components, table layout, Tailwind styling
+- **Days 7-8**: Integration testing, bug fixes, error handling, bookmarklet refinement
 - **Day 9**: Polish, documentation, final testing
 
 Total: ~9 days for MVP
+
+**Note**: Original backend Puppeteer approach attempted but abandoned due to DataDome anti-bot protection. Bookmarklet approach implemented as primary solution.
 
 ## Implementation Milestones
 
@@ -527,18 +541,18 @@ Total: ~9 days for MVP
 
 **Success Criteria**: Running `pnpm dev` starts both frontend and backend servers without errors
 
-### Milestone 2: Backend Core - Web Scraping
-**Goal**: Implement working Puppeteer scraping service
+### Milestone 2: Data Extraction - Bookmarklet Implementation
+**Goal**: Implement working bookmarklet data extraction
 
 **Deliverables**:
-- Express server with CORS and rate limiting
-- Puppeteer service that scrapes Idealista properties
-- API endpoint: POST /api/scraper/property
-- URL validation utility
-- Error handling middleware
-- Winston logger setup
+- Readable bookmarklet source in `utils/bookmarklet.js`
+- Extraction logic for all 11+ property fields
+- Support for Spanish and English Idealista pages
+- Base64 encoding and hash parameter generation
+- BookmarkletInstall component with minified code
+- Hash import logic in App.jsx
 
-**Success Criteria**: Can successfully scrape a real Idealista property URL via API call and receive structured JSON data
+**Success Criteria**: Can click bookmarklet on Idealista property page and see property imported in app with all fields populated
 
 ### Milestone 3: Frontend Foundation
 **Goal**: Create React app structure with basic components
@@ -546,35 +560,35 @@ Total: ~9 days for MVP
 **Deliverables**:
 - Tailwind CSS configured with custom colors
 - useLocalStorage hook
-- usePropertyData hook
-- API service with Axios
+- Hash import detection and decoding logic
 - Basic App.jsx structure
+- BookmarkletInstall component
 
-**Success Criteria**: App renders with proper styling, can make API calls (even if components aren't complete)
+**Success Criteria**: App renders with proper styling, can detect and decode hash imports, displays bookmarklet installation UI
 
 ### Milestone 4: Frontend UI Components
 **Goal**: Build all user-facing components
 
 **Deliverables**:
 - ImageCarousel component (Swiper.js)
-- PropertyCard component
-- UrlInputForm component
-- ComparisonContainer component
+- ComparisonContainer component with table layout
+- 11 comparison rows with proper rendering
+- Features and description cells with show more/less
 - Complete App.jsx with all handlers
 
-**Success Criteria**: Full user flow works - add property, view in comparison, remove property, clear all
+**Success Criteria**: Full user flow works - install bookmarklet, import property, view in table, remove property, clear all
 
 ### Milestone 5: Integration & Testing
 **Goal**: End-to-end functionality with localStorage persistence
 
 **Deliverables**:
-- Vite proxy configured for backend
 - localStorage persistence working
-- Error handling for all edge cases
+- Bookmarklet works on Spanish and English pages
+- Error handling for all edge cases (wrong page, missing data, malformed hash)
 - Manual testing checklist completed
-- Performance verification
+- Performance verification (instant extraction, smooth scrolling)
 
-**Success Criteria**: Can add multiple properties, refresh page (data persists), remove properties, horizontal scroll works
+**Success Criteria**: Can install bookmarklet, import multiple properties from Idealista, refresh page (data persists), remove properties, table horizontal scroll works smoothly
 
 ### Milestone 6: Polish & Documentation
 **Goal**: Production-ready application with documentation
