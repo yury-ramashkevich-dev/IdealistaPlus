@@ -167,6 +167,7 @@
   };
 
   // Encode and send to app
+  // __APP_ORIGIN__ is replaced at runtime by BookmarkletInstall.jsx with window.location.origin
   var encoded = btoa(unescape(encodeURIComponent(JSON.stringify(data))));
-  window.open('http://localhost:5173/#import=' + encoded, 'IdealistaPlus');
+  window.open('__APP_ORIGIN__/#import=' + encoded, 'IdealistaPlus');
 })();

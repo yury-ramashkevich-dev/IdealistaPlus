@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useLocalStorage } from './hooks/useLocalStorage';
 import BookmarkletInstall from './components/BookmarkletInstall/BookmarkletInstall';
 import ComparisonContainer from './components/ComparisonView/ComparisonContainer';
+import ErrorBoundary from './components/UI/ErrorBoundary';
 
 function App() {
   const { properties, addProperty, removeProperty, clearAll } = useLocalStorage();
@@ -68,6 +69,7 @@ function App() {
             <button
               onClick={handleClearAll}
               className="text-sm text-gray-500 hover:text-red-500 transition-colors"
+              aria-label={`Clear all ${properties.length} properties`}
             >
               Clear all ({properties.length})
             </button>
@@ -76,18 +78,19 @@ function App() {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 py-8 space-y-6">
-        {/* Bookmarklet Install */}
         <div className="bg-white rounded-lg shadow-sm p-6">
           <BookmarkletInstall />
         </div>
 
-        {/* Import message */}
         {importMessage && (
-          <div className={`rounded-lg p-4 flex items-start justify-between ${
-            importMessage.type === 'success' ? 'bg-green-50 border border-green-200' :
-            importMessage.type === 'error' ? 'bg-red-50 border border-red-200' :
-            'bg-blue-50 border border-blue-200'
-          }`}>
+          <div
+            role="alert"
+            className={`rounded-lg p-4 flex items-start justify-between ${
+              importMessage.type === 'success' ? 'bg-green-50 border border-green-200' :
+              importMessage.type === 'error' ? 'bg-red-50 border border-red-200' :
+              'bg-blue-50 border border-blue-200'
+            }`}
+          >
             <p className={`text-sm ${
               importMessage.type === 'success' ? 'text-green-600' :
               importMessage.type === 'error' ? 'text-red-600' :
@@ -96,17 +99,19 @@ function App() {
             <button
               onClick={() => setImportMessage(null)}
               className="text-gray-400 hover:text-gray-600 ml-4 flex-shrink-0"
+              aria-label="Dismiss message"
             >
               &times;
             </button>
           </div>
         )}
 
-        {/* Comparison View */}
-        <ComparisonContainer
-          properties={properties}
-          onRemove={removeProperty}
-        />
+        <ErrorBoundary>
+          <ComparisonContainer
+            properties={properties}
+            onRemove={removeProperty}
+          />
+        </ErrorBoundary>
       </main>
     </div>
   );

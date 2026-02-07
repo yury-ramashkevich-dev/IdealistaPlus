@@ -298,6 +298,55 @@ Puppeteer scraping was blocked by DataDome anti-bot protection. Pivoted to a bro
 
 ---
 
+## ✅ Completed: Milestone 6 - Polish & Documentation
+**Goal**: Make project production-ready with dynamic URLs, error handling, accessibility, and documentation
+**Success Criteria**: Bookmarklet works on any host, app is accessible, README exists, all tests pass
+
+### Action Items
+
+- [x] 1. Make bookmarklet URL dynamic (replace hardcoded `localhost:5173` with `window.location.origin`)
+- [x] 2. Create ErrorBoundary component and wrap ComparisonContainer
+- [x] 3. Create custom SVG favicon (green house icon)
+- [x] 4. Update index.html with favicon, meta description, theme-color
+- [x] 5. Add ARIA labels to all interactive elements (buttons, table, SVGs)
+- [x] 6. Add focus-visible outline styles for keyboard navigation
+- [x] 7. Replace stale .env content (removed unused `VITE_API_URL`)
+- [x] 8. Extract magic number 120 → `DESCRIPTION_TRUNCATE_LENGTH` constant
+- [x] 9. Create comprehensive README.md at project root
+- [x] 10. Verify all 46 tests still pass
+- [x] 11. Verify production build succeeds
+
+### Files Created/Modified
+
+**New files:**
+- ✓ `packages/frontend/src/components/UI/ErrorBoundary.jsx` (class component with fallback UI)
+- ✓ `packages/frontend/public/favicon.svg` (green house icon)
+- ✓ `README.md` (Quick Start, How It Works, Tech Stack, Scripts, Deployment)
+
+**Modified files:**
+- ✓ `packages/frontend/src/components/BookmarkletInstall/BookmarkletInstall.jsx` (dynamic URL via useMemo)
+- ✓ `packages/frontend/src/utils/bookmarklet.js` (updated reference with `__APP_ORIGIN__` placeholder)
+- ✓ `packages/frontend/src/App.jsx` (ErrorBoundary wrapper, ARIA labels on messages/buttons)
+- ✓ `packages/frontend/src/components/ComparisonView/ComparisonContainer.jsx` (ARIA labels, DESCRIPTION_TRUNCATE_LENGTH constant)
+- ✓ `packages/frontend/src/components/UI/ImageCarousel.jsx` (aria-label on carousel)
+- ✓ `packages/frontend/src/index.css` (focus-visible outline styles)
+- ✓ `packages/frontend/index.html` (favicon, meta description, theme-color)
+- ✓ `packages/frontend/.env` (replaced stale content with comment)
+
+### Verification Results
+
+1. ✅ 46 tests passing across 5 test files
+2. ✅ Production build succeeds (252 KB JS, 25 KB CSS)
+3. ✅ Bookmarklet URL uses `window.location.origin` (works on any host)
+4. ✅ ErrorBoundary catches render errors with friendly fallback UI
+5. ✅ Custom favicon displays in browser tab
+6. ✅ All interactive elements have ARIA labels
+7. ✅ Focus-visible outlines appear for keyboard navigation
+
+**Milestone 6 Status**: ✅ COMPLETE
+
+---
+
 ## Completed Milestones
 1. ✅ Milestone 1: Project Bootstrap (Completed: 2026-02-05)
 2. ✅ Milestone 2: Backend Core - Web Scraping (Completed: 2026-02-06)
@@ -305,6 +354,6 @@ Puppeteer scraping was blocked by DataDome anti-bot protection. Pivoted to a bro
 4. ✅ Milestone 4: Bookmarklet Integration (Completed: 2026-02-06)
 5. ✅ Milestone 4.1: Table-Based Comparison View (Completed: 2026-02-06)
 6. ✅ Milestone 5: Dead Code Removal & Test Suite (Completed: 2026-02-07)
+7. ✅ Milestone 6: Polish & Documentation (Completed: 2026-02-07)
 
-## Upcoming Milestones
-- Milestone 6: Polish & Documentation
+## All Milestones Complete! 🎉

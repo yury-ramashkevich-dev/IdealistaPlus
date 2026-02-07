@@ -17,6 +17,7 @@ const COMPARISON_ROWS = [
 
 const COL_WIDTH_PX = 300;
 const LABEL_WIDTH_PX = 160;
+const DESCRIPTION_TRUNCATE_LENGTH = 120;
 
 function DescriptionCell({ text }) {
   const [expanded, setExpanded] = useState(false);
@@ -27,7 +28,7 @@ function DescriptionCell({ text }) {
       <p className={`text-sm text-gray-600 ${expanded ? '' : 'line-clamp-3'}`}>
         {text}
       </p>
-      {text.length > 120 && (
+      {text.length > DESCRIPTION_TRUNCATE_LENGTH && (
         <button
           onClick={() => setExpanded(!expanded)}
           className="text-xs text-idealista-green hover:underline mt-1"
@@ -92,6 +93,7 @@ function ComparisonContainer({ properties, onRemove }) {
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
+          aria-hidden="true"
         >
           <path
             strokeLinecap="round"
@@ -116,6 +118,7 @@ function ComparisonContainer({ properties, onRemove }) {
         <table
           className="border-collapse table-fixed"
           style={{ width: `${tableWidth}px` }}
+          aria-label="Property comparison"
         >
           <colgroup>
             <col style={{ width: `${LABEL_WIDTH_PX}px` }} />
@@ -143,6 +146,7 @@ function ComparisonContainer({ properties, onRemove }) {
                       onClick={() => onRemove(property.url)}
                       className="absolute top-2 right-2 z-20 w-7 h-7 flex items-center justify-center rounded-full bg-black/40 text-white hover:bg-red-500 transition-colors text-sm font-bold"
                       title="Remove property"
+                      aria-label={`Remove ${property.title || 'property'}`}
                     >
                       &times;
                     </button>

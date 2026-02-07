@@ -7,6 +7,7 @@
     "dev": "pnpm --filter frontend dev",
     "build": "pnpm --filter frontend build",
     "test": "pnpm --filter frontend test",
+    "test:run": "pnpm --filter frontend test:run",
     "lint": "pnpm -r lint",
     "format": "prettier --write \"packages/**/*.{js,jsx,json,css,md}\""
   },

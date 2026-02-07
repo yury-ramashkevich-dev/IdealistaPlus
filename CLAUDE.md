@@ -315,8 +315,11 @@ No environment variables required - the application is fully client-side with bo
 
 ### Root package.json
 - `pnpm dev` - Start frontend dev server
+- `pnpm build` - Build frontend for production
 - `pnpm test` - Run tests in watch mode
 - `pnpm test:run` - Run tests once (CI mode)
+- `pnpm lint` - Run linter across all packages
+- `pnpm format` - Format code with Prettier
 
 ### Frontend package.json
 - `pnpm dev` - Start Vite dev server
@@ -348,7 +351,7 @@ No environment variables required - the application is fully client-side with bo
 ### Frontend
 - Build: `pnpm --filter frontend build` or `cd packages/frontend && pnpm build`
 - Deploy to: Vercel, Netlify, or any static hosting
-- Update bookmarklet code to point to production URL instead of `localhost:5173`
+- Bookmarklet URL is auto-detected from `window.location.origin` — works on any host without configuration
 - Pure static site - no backend required
 - No environment variables needed
 - Production build size: ~250 KB JS, ~25 KB CSS
@@ -362,4 +365,4 @@ No environment variables required - the application is fully client-side with bo
 ---
 
 **Last Updated**: 2026-02-07
-**Status**: Active Development - Milestone 5 Complete (Frontend-Only with Test Suite)
+**Status**: All Milestones Complete (1-6) — Production-Ready

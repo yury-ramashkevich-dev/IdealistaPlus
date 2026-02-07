@@ -2,6 +2,13 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  *:focus-visible {
+    outline: 2px solid #00B389;
+    outline-offset: 2px;
+  }
+}
+
 @layer utilities {
   .scrollbar-hide::-webkit-scrollbar {
     display: none;

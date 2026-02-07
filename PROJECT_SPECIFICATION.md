@@ -156,11 +156,6 @@ pnpm install -D nodemon
 - Fallback copy-to-clipboard for mobile
 - Set href imperatively to avoid React warnings
 
-**2.3 Backend (Optional/Deprecated)**
-- Puppeteer implementation kept for reference
-- Blocked by DataDome anti-bot protection
-- Not functional without CAPTCHA solving or residential proxies
-
 ### Phase 3: Frontend Development (Days 4-6)
 
 **3.1 Setup Tailwind CSS**
@@ -271,9 +266,9 @@ export default defineConfig({
 ### Phase 4: Integration & Testing (Days 7-8)
 
 **4.1 Setup Development Environment**
-- Install concurrently in root package.json
-- Create dev scripts to run frontend + backend together
-- Test hot-reloading works for both
+- Configure Vitest and React Testing Library
+- Create test setup file for jsdom environment
+- Test hot-reloading works
 
 **4.2 Manual Testing Checklist**
 - [ ] Drag bookmarklet to bookmarks bar successfully
@@ -391,25 +386,19 @@ export default defineConfig({
 ## Key Technical Considerations
 
 ### Data Extraction Challenges
-1. **Anti-Bot Protection (Backend Approach - Failed)**:
-   - Idealista uses DataDome anti-bot protection
-   - Blocks Puppeteer/automated browsers even with realistic settings
-   - Would require CAPTCHA solving service or residential proxies
-   - **Solution**: Switched to bookmarklet approach
-
-2. **Bookmarklet Approach (Current)**:
-   - Runs in user's actual browser session (bypasses anti-bot)
+1. **Bookmarklet Approach**:
+   - Runs in user's actual browser session (no anti-bot concerns)
    - No rate limiting concerns (user manually navigates)
    - Works with dynamic JavaScript-loaded content
    - Must handle both Spanish and English page variations
    - User must be on Idealista property page when clicking bookmarklet
 
-3. **Dynamic Content**: Images and data loaded via JavaScript
+2. **Dynamic Content**: Images and data loaded via JavaScript
    - Bookmarklet runs after page fully loads
    - Access to all DOM elements and JavaScript variables
    - Extract images from multiple sources (img tags, picture sources, data attributes)
 
-4. **Selector Changes**: Idealista HTML may change
+3. **Selector Changes**: Idealista HTML may change
    - Use multiple selector strategies (primary + fallback)
    - Test on both Spanish (.es) and English Idealista sites
    - Plan for periodic maintenance of bookmarklet selectors
@@ -438,8 +427,22 @@ export default defineConfig({
 
 ## Verification & Testing
 
+### Automated Test Suite
+The project includes 46 tests across 5 test files:
+- `useLocalStorage.test.js` - 10 tests (init, add, remove, clear, dedup, debounce)
+- `ComparisonContainer.test.jsx` - 12 tests (table layout, empty state, cells)
+- `ImageCarousel.test.jsx` - 5 tests (rendering, lazy loading)
+- `BookmarkletInstall.test.jsx` - 6 tests (link, href, copy button)
+- `App.test.jsx` - 13 tests (hash import, auto-dismiss, clear all)
+
+**Run tests:**
+```bash
+pnpm test          # Watch mode
+pnpm test:run      # CI mode (run once)
+```
+
 ### End-to-End Test Flow
-1. **Setup**: Run `pnpm dev:frontend` from root directory
+1. **Setup**: Run `pnpm dev` from root directory
 2. **Access**: Open http://localhost:5173 in browser
 3. **Install Bookmarklet**:
    - Drag green "+ IdealistaPlus" button to bookmarks bar
@@ -509,7 +512,7 @@ export default defineConfig({
 
 Total: ~9 days for MVP
 
-**Note**: Original backend Puppeteer approach attempted but abandoned due to DataDome anti-bot protection. Bookmarklet approach implemented as primary solution.
+**Note**: Original backend Puppeteer approach attempted but removed in Milestone 5. Application is now fully client-side with bookmarklet-based extraction.
 
 ## Implementation Milestones
 
@@ -563,17 +566,18 @@ Total: ~9 days for MVP
 
 **Success Criteria**: Full user flow works - install bookmarklet, import property, view in table, remove property, clear all
 
-### Milestone 5: Integration & Testing
-**Goal**: End-to-end functionality with localStorage persistence
+### Milestone 5: Dead Code Removal & Test Suite
+**Goal**: Remove unused backend code and add comprehensive test suite
 
 **Deliverables**:
-- localStorage persistence working
-- Bookmarklet works on Spanish and English pages
-- Error handling for all edge cases (wrong page, missing data, malformed hash)
-- Manual testing checklist completed
-- Performance verification (instant extraction, smooth scrolling)
+- Backend package removed entirely
+- Dead frontend code removed (usePropertyData, api.js, UrlInputForm)
+- Dependencies cleaned up (axios, concurrently removed)
+- Vite proxy config removed
+- Vitest test suite with 46 tests across 5 files
+- Production build succeeds
 
-**Success Criteria**: Can install bookmarklet, import multiple properties from Idealista, refresh page (data persists), remove properties, table horizontal scroll works smoothly
+**Success Criteria**: All tests passing, production build works, frontend-only architecture complete
 
 ### Milestone 6: Polish & Documentation
 **Goal**: Production-ready application with documentation
